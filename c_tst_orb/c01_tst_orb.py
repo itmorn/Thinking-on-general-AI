@@ -1,64 +1,18 @@
-import cv2 as cv
+import numpy as np
+import cv2
+import time
+img = cv2.imread('../a01_test_canny/123.jpg')
+img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-def ORB_Feature(img1, img2):
+orb = cv2.ORB_create(100000)
 
-    # 初始化ORB
-    orb = cv.ORB_create(100000)
+keypoints = orb.detect(img_gray, None)
 
-    # 寻找关键点
-    kp1 = orb.detect(img1)
-    kp2 = orb.detect(img2)
+a = time.time()
+kp2, des2 = orb.detectAndCompute(img_gray, None)
+print(time.time()-a)
 
-    # 计算描述符
-    kp1, des1 = orb.compute(img1, kp1)
-    kp2, des2 = orb.compute(img2, kp2)
+img_sift = np.copy(img)
 
-    # 画出关键点
-    outimg1 = cv.drawKeypoints(img1, keypoints=kp1, outImage=None)
-    outimg2 = cv.drawKeypoints(img2, keypoints=kp2, outImage=None)
-
-	# 显示关键点
-    # import numpy as np
-    # outimg3 = np.hstack([outimg1, outimg2])
-    # cv.imshow("Key Points", outimg3)
-    # cv.waitKey(0)
-
-    # 初始化 BFMatcher
-    bf = cv.BFMatcher(cv.NORM_HAMMING)
-
-    # 对描述子进行匹配
-    matches = bf.match(des1, des2)
-
-    # 计算最大距离和最小距离
-    min_distance = matches[0].distance
-    max_distance = matches[0].distance
-    for x in matches:
-        if x.distance < min_distance:
-            min_distance = x.distance
-        if x.distance > max_distance:
-            max_distance = x.distance
-
-    # 筛选匹配点
-    '''
-        当描述子之间的距离大于两倍的最小距离时，认为匹配有误。
-        但有时候最小距离会非常小，所以设置一个经验值30作为下限。
-    '''
-    good_match = []
-    for x in matches:
-        if x.distance <= max(2 * min_distance, 30):
-            print(max(2 * min_distance, 30))
-            good_match.append(x)
-
-    # 绘制匹配结果
-    draw_match(img1, img2, kp1, kp2, good_match)
-
-def draw_match(img1, img2, kp1, kp2, match):
-    outimage = cv.drawMatches(img1, kp1, img2, kp2, match, outImg=None)
-    cv.imshow("Match Result", outimage)
-    cv.waitKey(0)
-
-if __name__ == '__main__':
-    # 读取图片
-    image1 = cv.imread('../b02_test_sift/6.png')
-    image2 = cv.imread('../b02_test_sift/tmp6.jpg')
-    ORB_Feature(image1, image2)
+cv2.drawKeypoints(img, keypoints, img_sift, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+cv2.imwrite('res_orb.png', img_sift)
