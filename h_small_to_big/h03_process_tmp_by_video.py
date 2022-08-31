@@ -36,14 +36,17 @@ def get_video_info(in_file):
         sys.exit(1)
 
 
-def orb(img_gray,num_frame,frame):
+def orb(frame,num_frame):
+
+    img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
     # a = time.time()
     kp, des = orb_detetor.detectAndCompute(img_gray, None)
-    if des is None:
-        print("None")
-        return
     # print(time.time() - a)
     arr_xy = np.array([[i.pt[0], i.pt[1]] for i in kp],dtype=np.float32)
+    if  des is None:
+        print("None")
+        return
     des = des.astype(np.float32)
     des = des/((np.sum(des**2,axis=1)**0.5).reshape(-1,1))
     arr_xy_des = np.c_[arr_xy, des]
@@ -65,8 +68,9 @@ if __name__ == '__main__':
     shutil.rmtree("npy",ignore_errors=True)
     os.makedirs("npy")
 
-    orb_detetor = cv2.ORB_create(10000)
-    VIDEO_NAME = "../dde38028db3d9b60269685687623736d.mp4"
+    orb_detetor = cv2.SIFT_create(1)
+
+    VIDEO_NAME = "../images/front.mp4"
 
     DURATION_TIME = 0.2  # 每隔x秒提取一张图片
 
@@ -77,21 +81,14 @@ if __name__ == '__main__':
         frame_b = read_frame_by_time(VIDEO_NAME, num)
         frame = cv2.imdecode(np.asarray(bytearray(frame_b), dtype="uint8"), cv2.IMREAD_COLOR)
 
-        frame = cv2.resize(frame, (0, 0), fx=0.1, fy=0.1)
+        frame = np.rot90(frame)
+
+        frame = cv2.resize(frame, (0, 0), fx=0.03, fy=0.03)
 
         num_frame = "%06d" % int(num*10)
-
-        img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        x = cv2.Sobel(img_gray, cv2.CV_16S, 1, 0)
-        y = cv2.Sobel(img_gray, cv2.CV_16S, 0, 1)
-
-        absX = cv2.convertScaleAbs(x)  # 转回uint8
-        absY = cv2.convertScaleAbs(y)
-        img_gray = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
-        img_gray = np.clip(img_gray.astype(np.float32) * 5, 0, 255).astype(np.uint8)
-        img_orb = orb(img_gray,num_frame,frame)
+        img_orb = orb(frame,num_frame)
         if not img_orb is None:
-            cv2.imwrite(f"pic_frame/{num_frame}.png", img_gray)
+            cv2.imwrite(f"pic_frame/{num_frame}.png", frame)
             cv2.imwrite(f"pic_orb/{num_frame}.png", img_orb)
-            print(num,total_duration)
+        print(num,total_duration)
         num+=DURATION_TIME

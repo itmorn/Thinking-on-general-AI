@@ -1,6 +1,4 @@
 # 对特征点进行聚类
-import time
-
 import shutil
 
 import os
@@ -23,12 +21,9 @@ if __name__ == '__main__':
 
     NXY = arr_all[:,:3]
     vec = arr_all[:,3:]
-    print("len(vec)",len(vec))
-    a = time.time()
+    print("len(vec)", len(vec))
 
-    k_means = KMeans(n_clusters=300, n_jobs=-1)
+    k_means = KMeans(n_clusters=3, n_jobs=-1)#random_state=10,
     k_means.fit(vec)
     print(k_means.cluster_centers_)
     np.save("k_means",k_means.cluster_centers_)
-    print(k_means.inertia_)
-    print(time.time()-a)

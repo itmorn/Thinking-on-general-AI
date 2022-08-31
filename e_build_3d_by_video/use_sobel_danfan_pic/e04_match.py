@@ -18,9 +18,9 @@ def orb(img_gray,frame):
     return arr_xy,arr_des
 
 if __name__ == '__main__':
-    orb_detetor = cv2.ORB_create(200000)
+    orb_detetor = cv2.ORB_create(20000)
     # img = cv2.imread("../b02_test_sift/4ed7a3e4962b59bbfea5c6d959bdff1.jpg",1)
-    img = cv2.imread("../../a01_test_canny/12.jpg", 1)
+    img = cv2.imread("../../images/12.jpg", 1)
 
     # img = cv2.resize(img, (0, 0), fx=0.3, fy=0.3)
 
@@ -40,10 +40,12 @@ if __name__ == '__main__':
     arr_des = arr_des.astype(np.float32)
     arr_des = arr_des / ((np.sum(arr_des ** 2, axis=1) ** 0.5).reshape(-1, 1))
     arr_kmeans = np.load("k_means.npy")
+    arr_kmeans = arr_kmeans / ((np.sum(arr_kmeans ** 2, axis=1) ** 0.5).reshape(-1, 1))
+
     arr_res = np.max(np.matmul(arr_des, arr_kmeans.T), axis=1)
 
     for idx_pic,max_val in enumerate(arr_res):
-        if max_val<0.92:
+        if max_val<0.9:
             continue
         X,Y = arr_xy[idx_pic]
         des = arr_des[idx_pic]
