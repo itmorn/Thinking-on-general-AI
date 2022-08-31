@@ -36,10 +36,7 @@ def get_video_info(in_file):
         sys.exit(1)
 
 
-def orb(frame,num_frame):
-
-    img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+def orb(img_gray,num_frame,frame):
     # a = time.time()
     kp, des = orb_detetor.detectAndCompute(img_gray, None)
     # print(time.time() - a)
@@ -65,8 +62,8 @@ if __name__ == '__main__':
     shutil.rmtree("npy",ignore_errors=True)
     os.makedirs("npy")
 
-    orb_detetor = cv2.ORB_create(10000)
-    VIDEO_NAME = "dde38028db3d9b60269685687623736d.mp4"
+    orb_detetor = cv2.ORB_create(1000)
+    VIDEO_NAME = "../dde38028db3d9b60269685687623736d.mp4"
 
     DURATION_TIME = 0.2  # 每隔x秒提取一张图片
 
@@ -77,8 +74,17 @@ if __name__ == '__main__':
         frame_b = read_frame_by_time(VIDEO_NAME, num)
         frame = cv2.imdecode(np.asarray(bytearray(frame_b), dtype="uint8"), cv2.IMREAD_COLOR)
         num_frame = "%06d" % int(num*10)
-        cv2.imwrite(f"pic_frame/{num_frame}.png", frame)
-        img_orb = orb(frame,num_frame)
+
+        img_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        x = cv2.Sobel(img_gray, cv2.CV_16S, 1, 0)
+        y = cv2.Sobel(img_gray, cv2.CV_16S, 0, 1)
+
+        absX = cv2.convertScaleAbs(x)  # 转回uint8
+        absY = cv2.convertScaleAbs(y)
+        img_gray = cv2.addWeighted(absX, 0.5, absY, 0.5, 0)
+        img_gray = np.clip(img_gray.astype(np.float32) * 5, 0, 255).astype(np.uint8)
+        cv2.imwrite(f"pic_frame/{num_frame}.png", img_gray)
+        img_orb = orb(img_gray,num_frame,frame)
         cv2.imwrite(f"pic_orb/{num_frame}.png", img_orb)
         print(num,total_duration)
         num+=DURATION_TIME

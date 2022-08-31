@@ -34,8 +34,9 @@ if __name__ == '__main__':
     for idx_max in arr_idx_max:
         N,X,Y = [int(i) for i in NXY[idx_max]]
         img = cv2.imread(f"pic_frame/{'%06d' % N}.png")
+        H,W,_ = img.shape
         print(N,X,Y)
-        img[max(Y-10,0):min(Y+10,1280), max(X-10,0):min(X+10,720), 0] = 0
-        img[max(Y-10,0):min(Y+10,1280), max(X-10,0):min(X+10,720), 1] = 0
-        img[max(Y-10,0):min(Y+10,1280), max(X-10,0):min(X+10,720), 2] = 255
+        img[max(Y-10,0):min(Y+10,H), max(X-10,0):min(X+10,W), 0] = 0
+        img[max(Y-10,0):min(Y+10,H), max(X-10,0):min(X+10,W), 1] = 0
+        img[max(Y-10,0):min(Y+10,H), max(X-10,0):min(X+10,W), 2] = 255
         cv2.imwrite(f"kmeans_show/{'%06d' % N}_{X}_{Y}.png",img)
