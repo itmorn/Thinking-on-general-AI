@@ -5,6 +5,7 @@ import cv2 as cv
 from matplotlib import pyplot as plt
 # img = cv.imread('../a01_test_canny/123.jpg',0)
 img = cv.imread('../images/12.jpg',0)
+img = cv.resize(img, (0, 0), fx=0.2, fy=0.2)
 # 初始化FAST检测器
 fast = cv.FastFeatureDetector_create()
 brief = cv.xfeatures2d.BriefDescriptorExtractor_create(16)
